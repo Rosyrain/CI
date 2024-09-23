@@ -227,7 +227,7 @@ jobs:
           fi
           cp $GITHUB_WORKSPACE/merged_coverage.out $GITHUB_WORKSPACE/all_middle_files/merged_coverage.out
 
-      - name: Upload All Middle
+      - name: Upload All Middle 2
         uses: actions/upload-artifact@v4
         if: ${{ always() && !cancelled() }}
         with:
