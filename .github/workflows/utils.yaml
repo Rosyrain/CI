@@ -2,97 +2,40 @@
 name: MatrixOne Utils CI
 
 on:
-  workflow_call:
-    secrets:
-      TOKEN_ACTION:
-        description: "A token passed from the caller workflow"
+  workflow_dispatch:
+    inputs:
+      base_repository:
+        description: 'Base repository (e.g., matrixorigin/matrixone)'
         required: true
-      S3ENDPOINT:
-        description: "S3ENDPOINT For Test"
+        default: "matrixorigin/matrixone"
+      base_ref:
+        description: 'Base branch (e.g., main)'
         required: true
-      S3REGION:
-        description: "S3REGION For Test"
+        default: "main"
+      head_repository:
+        description: 'Head repository (e.g., Rosyrain/matrixone)'
         required: true
-      S3APIKEY:
-        description: "S3APIKEY For Test"
-        required: true
-      S3APISECRET:
-        description: "S3APISECRET For Test"
-        required: true
-      S3BUCKET:
-        description: "S3BUCKET For Test"
-        required: true
-      DOCU_GROUP_HOOK:
-        description: "DOCU_GROUP_HOOK For Notice"
-        required: true
-      OPENAI_API_KEY:
-        description: "OPENAI_API_KEY For get PR Suggestion"
+      head_ref:
+        description: 'Head branch (e.g., test)'
         required: true
 
 jobs:
-  check_organization_user:
-    runs-on: ubuntu-22.04
-    outputs:
-      in_org: ${{ steps.check_in_org.outputs.in_org }}
-      safe_label: ${{ steps.check_safe_label.outputs.safe_label }}
-    steps:
-      - id: check_in_org
-        name: CHECK ORGANIZATION USER
-        run: |
-          PAGE=1;
-          PER_PAGE=100;
-          USER_IN_ORG="0";
-          while true; do
-            users=$(curl -L \
-              -H "Accept: application/vnd.github+json" \
-              -H "Authorization: Bearer ${{ secrets.TOKEN_ACTION }}" \
-              -H "X-GitHub-Api-Version: 2022-11-28" \
-              "https://api.github.com/orgs/matrixorigin/members?page=$PAGE&per_page=$PER_PAGE");
-            if [ $(echo $users | jq ".[].login" | grep -c "${{ github.event.pull_request.user.login }}" ) -eq 1 ]; then
-              USER_IN_ORG="1";
-              break;
-            fi
-            if [ $(echo $users | jq ".[].login" | wc -l ) -eq $PER_PAGE ]; then
-              PAGE=$(($PAGE+1));
-              users="";
-            else
-              break;
-            fi
-          done
-          echo "in_org=$USER_IN_ORG" >> $GITHUB_OUTPUT;
-
-      - id: check_safe_label
-        name: CHECK PULL REQUEST LABEL
-        run: |
-          labels=$(curl -L \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ secrets.TOKEN_ACTION }}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            '${{ github.event.pull_request.url}}' | jq ".labels");
-          if [ $(echo $labels | jq ".[].name" | grep -c "safe-to-test" ) -ge 1 ]; then
-            echo "safe_label=1" >> $GITHUB_OUTPUT;
-          else
-            echo "safe_label=0" >> $GITHUB_OUTPUT;
-          fi
-
   pr_coverage:
-    if: ${{ needs.check_organization_user.outputs.safe_label == '1' || needs.check_organization_user.outputs.in_org == '1' }}
     name: PR Unit and BVT Test Coverage
-    needs: [check_organization_user]
-    runs-on: amd64-mo-guangzhou-2xlarge16
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: "1"
           path: ./matrixone
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ inputs.head_repository }}
+          ref: ${{ inputs.head_ref }}
       - name: Generate diff.patch
         run: |
           cd $GITHUB_WORKSPACE/matrixone
           retry_times=5
           delay=3
-          url="https://github.com/${{ github.event.pull_request.base.repo.full_name }}/pull/${{ github.event.pull_request.number }}.diff"
+          url="https://github.com/${{ github.event.inputs.base_repository }}/compare/${{ github.event.inputs.base_ref }}...${{ github.event.inputs.head_repository }}:${{ github.event.inputs.head_ref }}.diff"
           for ((i = 1; i <= retry_times; i++)); do
             echo "url: $url"
             if curl -f --max-time 10 -L -o diff.patch $url;then
@@ -256,51 +199,32 @@ jobs:
             ${{ github.workspace }}/coverage_downloads/final_result_files.zip
           retention-days: 7
 
-  pr-size-label:
-    runs-on: ubuntu-22.04
-    needs: [check_organization_user]
-    steps:
-      - name: size-label
-        uses: "matrixorigin/CI/actions/label-size-action@main"
-        with:
-          size_token: ${{ secrets.TOKEN_ACTION }}
-          ignore: ".md,.pb.go"
-          sizes: >
-            {
-              "XS":0,
-              "S":10,
-              "M":100,
-              "L":500,
-              "XL":1000,
-              "XXL":2000
-            }
+      - name: Get All Middle Files
+        if: ${{ always() && !cancelled() }}
+        run: |
+          cd $GITHUB_WORKSPACE
+          mkdir -p all_middle_files
+          
+          sort $GITHUB_WORKSPACE/matrixone/UT-Report.raw | uniq > $GITHUB_WORKSPACE/all_middle_files/UT-Report-sort.raw
+          sort $GITHUB_WORKSPACE/matrixone/ut_coverage.raw | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.raw
+          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.raw $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.raw
+          cp $GITHUB_WORKSPACE/matrixone/ut_coverage.html $GITHUB_WORKSPACE/all_middle_files/ut_coverage.html
+          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.html $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.html
+          sort $GITHUB_WORKSPACE/matrixone/ut_coverage.out | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.out
+          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.out $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.out
+          
+          cp $GITHUB_WORKSPACE/matrixone/diff.patch $GITHUB_WORKSPACE/all_middle_files/diff.patch
+          
+          if [ -f "$GITHUB_WORKSPACE/pr_coverage.out" ]; then
+            cp $GITHUB_WORKSPACE/pr_coverage.out $GITHUB_WORKSPACE/all_middle_files/pr_coverage.out
+            cp $GITHUB_WORKSPACE/matrixone/pr_coverage.html $GITHUB_WORKSPACE/all_middle_files/pr_coverage.html
+          fi
+          cp $GITHUB_WORKSPACE/matrixone/merged_coverage.out $GITHUB_WORKSPACE/all_middle_files/merged_coverage.out
 
-  docu_issue_check:
-    runs-on: ubuntu-22.04
-    needs: [check_organization_user]
-    if: ${{ github.event.action == 'opened' }}
-    steps:
-      - uses: matrixorigin/CI/actions/pull-issue-reviewer@main
+      - name: Upload All Middle
+        uses: actions/upload-artifact@v4
+        if: ${{ always() && !cancelled() }}
         with:
-          token_action: ${{ secrets.TOKEN_ACTION }}
-          uri_notice: ${{ secrets.DOCU_GROUP_HOOK }}
-          name_label: "doc influence"
-          reviewers: "lacrimosaprinz,dengn"
-          mentions: "Prinz,DengNan"
-
-  # chatgpt-review:
-  #   name: ChatGPT Review
-  #   needs: [check_organization_user]
-  #   runs-on: ubuntu-22.04
-  #   if: ${{ github.event.action == 'opened' }}
-  #   steps:
-  #     - uses: matrixorigin/ChatGPT-Reviewer@main
-  #       name: ChatGPT Review
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.TOKEN_ACTION }}
-  #         OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-  #       with:
-  #         model: "gpt-3.5-turbo"
-  #         temperature: 0.2
-  #         review_per_file: false
-  #         comment_per_file: false
+          name: all-middle-files
+          path: ${{ github.workspace }}/all_middle_files
+          retention-days: 7
