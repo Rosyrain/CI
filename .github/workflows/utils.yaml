@@ -135,26 +135,6 @@ jobs:
           go tool cover -o ${{ env.bvt_html_coverage }} -html=${{ env.bvt_coverage }}
           echo "bvt_html_coverage finished"
 
-      - name: Download UT BVT Coverage and diff.patch Files
-        continue-on-error: true
-        run: |
-          cd $GITHUB_WORKSPACE
-          mkdir -p coverage_downloads
-          cp $GITHUB_WORKSPACE/matrixone/ut_coverage.out $GITHUB_WORKSPACE/coverage_downloads/ut_coverage.out
-          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.out $GITHUB_WORKSPACE/coverage_downloads/bvt_coverage.out
-          cp $GITHUB_WORKSPACE/matrixone/diff.patch $GITHUB_WORKSPACE/coverage_downloads/diff.patch
-          
-          cd $GITHUB_WORKSPACE/coverage_downloads
-          sort ut_coverage.out | uniq > ut_coverage_sort.out
-          zip -r coverage_files.zip ut_coverage_sort.out bvt_coverage.out diff.patch
-
-      - name: Upload Compressed Files
-        uses: actions/upload-artifact@v4
-        continue-on-error: true
-        with:
-          name: coverage-files
-          path: ${{ github.workspace }}/coverage_downloads/coverage_files.zip
-          retention-days: 7
       - name: Checkout for Python file
         uses: actions/checkout@v3
         with:
@@ -187,23 +167,6 @@ jobs:
           cd $GITHUB_WORKSPACE/matrixone
           cp $GITHUB_WORKSPACE/pr_coverage.out $GITHUB_WORKSPACE/matrixone/pr_coverage.out
           go tool cover -o pr_coverage.html -html=pr_coverage.out
-          
-          cd $GITHUB_WORKSPACE
-          cp $GITHUB_WORKSPACE/matrixone/pr_coverage.html $GITHUB_WORKSPACE/coverage_downloads/pr_coverage.html
-          cp $GITHUB_WORKSPACE/pr_coverage.out $GITHUB_WORKSPACE/coverage_downloads/pr_coverage.out
-          cp $GITHUB_WORKSPACE/merged_coverage.out $GITHUB_WORKSPACE/coverage_downloads/merged_coverage.out
-          
-          cd $GITHUB_WORKSPACE/coverage_downloads
-          zip -r final_result_files.zip pr_coverage.html pr_coverage.out merged_coverage.out
-      - name: Upload final result files
-        uses: actions/upload-artifact@v4
-        if: ${{ always() && !cancelled() && steps.compress_result.outputs.file_exists == 'true' }}
-        continue-on-error: true
-        with:
-          name: final-result-files
-          path: |
-            ${{ github.workspace }}/coverage_downloads/final_result_files.zip
-          retention-days: 7
 
       - name: Get All Middle Files
         if: ${{ always() && !cancelled() }}
@@ -228,7 +191,7 @@ jobs:
           fi
           cp $GITHUB_WORKSPACE/merged_coverage.out $GITHUB_WORKSPACE/all_middle_files/merged_coverage.out
 
-      - name: Upload All Middle 2
+      - name: Upload All Middle
         uses: actions/upload-artifact@v4
         if: ${{ always() && !cancelled() }}
         with:
