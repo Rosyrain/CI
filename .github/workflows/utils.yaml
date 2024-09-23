@@ -13,8 +13,9 @@ on:
         required: true
         default: "main"
       head_repository:
-        description: 'Head repository (e.g., Rosyrain/matrixone)'
+        description: 'Head repository (e.g., Rosyrain:matrixone)'
         required: true
+        default: "xxx:matrixone"
       head_ref:
         description: 'Head branch (e.g., test)'
         required: true
