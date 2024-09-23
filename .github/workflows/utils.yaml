@@ -15,7 +15,11 @@ on:
       head_repository:
         description: 'Head repository (e.g., Rosyrain:matrixone)'
         required: true
-        default: "xxx:matrixone"
+        default: "xxx/matrixone"
+      head_repo_owner:
+        description: 'Head repository owner (e.g., Rosyrain)'
+        required: true
+        default: "xxx"
       head_ref:
         description: 'Head branch (e.g., test)'
         required: true
@@ -37,7 +41,7 @@ jobs:
           cd $GITHUB_WORKSPACE/matrixone
           retry_times=5
           delay=3
-          url="https://github.com/${{ github.event.inputs.base_repository }}/compare/${{ github.event.inputs.base_ref }}...${{ github.event.inputs.head_repository }}:${{ github.event.inputs.head_ref }}.diff"
+          url="https://github.com/${{ inputs.base_repository }}/compare/${{ inputs.base_ref }}...${{ inputs.head_repo_owner }}:matrixone:${{ inputs.head_ref }}.diff"
           for ((i = 1; i <= retry_times; i++)); do
             echo "url: $url"
             if curl -f --max-time 10 -L -o diff.patch $url;then
