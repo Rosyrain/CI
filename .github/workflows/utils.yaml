@@ -174,11 +174,11 @@ jobs:
           cd $GITHUB_WORKSPACE
           mkdir -p all_middle_files
           
-          sort $GITHUB_WORKSPACE/matrixone/UT-Report.out | uniq > $GITHUB_WORKSPACE/all_middle_files/UT-Report-sort.out
-          sort $GITHUB_WORKSPACE/matrixone/ut_coverage.raw | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.raw
-          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.raw $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.raw
-          cp $GITHUB_WORKSPACE/matrixone/ut_coverage.html $GITHUB_WORKSPACE/all_middle_files/ut_coverage.html
-          cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.html $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.html
+          #sort $GITHUB_WORKSPACE/matrixone/UT-Report.out | uniq > $GITHUB_WORKSPACE/all_middle_files/UT-Report-sort.out
+          #sort $GITHUB_WORKSPACE/matrixone/ut_coverage.raw | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.raw
+          #cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.raw $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.raw
+          #cp $GITHUB_WORKSPACE/matrixone/ut_coverage.html $GITHUB_WORKSPACE/all_middle_files/ut_coverage.html
+          #cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.html $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.html
           cp $GITHUB_WORKSPACE/matrixone/ut_coverage.out $GITHUB_WORKSPACE/all_middle_files/ut_coverage.out
           sort $GITHUB_WORKSPACE/matrixone/ut_coverage.out | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.out
           cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.out $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.out
@@ -198,3 +198,17 @@ jobs:
           name: all-middle-files
           path: ${{ github.workspace }}/all_middle_files
           retention-days: 7
+
+      - name: Check Coverage(compare with branch main)
+        uses: Rosyrain/CI_test/actions/check_coverage@main
+        with:
+          ut_coverage_file: ${{ github.workspace }}/matrixone/ut_coverage.txt
+          bvt_coverage_file: ${{ github.workspace }}/matrixone/bvt_coverage.txt
+          pr_number: 1
+          pr_name: PR-test
+          pr_link: https://github.com/matrixorigin/matrixone/pull/1
+          mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
+          mo_port: 6001
+          mo_user: 01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin
+          mo_password: Jx20031002
+          mo_database: mo_coverage
