@@ -41,7 +41,7 @@ jobs:
           echo "test/file.go:1.1,1.2 1" >> bvt_coverage.out
 
       - name: Check Coverage(compare with branch main)
-        uses: Rosyrain/CI_test/actions/check_coverage@main
+        uses: Rosyrain/CI_test/actions/check-coverage@main
         with:
           ut_coverage_file: ${{ github.workspace }}/ut_coverage.out
           bvt_coverage_file: ${{ github.workspace }}/bvt_coverage.out
