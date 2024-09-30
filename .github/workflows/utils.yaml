@@ -43,7 +43,7 @@ jobs:
       - name: Check Coverage(compare with branch main)
         uses: Rosyrain/CI_test/actions/check-coverage@main
         with:
-          type: no_merged
+          type: open
           ut_coverage_file: ${{ github.workspace }}/ut_coverage.out
           bvt_coverage_file: ${{ github.workspace }}/bvt_coverage.out
           pr_number: 1
