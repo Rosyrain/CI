@@ -179,7 +179,7 @@ jobs:
           #cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.raw $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.raw
           #cp $GITHUB_WORKSPACE/matrixone/ut_coverage.html $GITHUB_WORKSPACE/all_middle_files/ut_coverage.html
           #cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.html $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.html
-          cp $GITHUB_WORKSPACE/matrixone/ut_coverage.out $GITHUB_WORKSPACE/all_middle_files/ut_coverage.out
+          #cp $GITHUB_WORKSPACE/matrixone/ut_coverage.out $GITHUB_WORKSPACE/all_middle_files/ut_coverage.out
           sort $GITHUB_WORKSPACE/matrixone/ut_coverage.out | uniq > $GITHUB_WORKSPACE/all_middle_files/ut_coverage_sort.out
           cp $GITHUB_WORKSPACE/matrixone/bvt_coverage.out $GITHUB_WORKSPACE/all_middle_files/bvt_coverage.out
           
