@@ -53,7 +53,31 @@ jobs:
           done
           echo "Max retries reached. Failed."
           exit 1
+      - name: Parepare file
+        run: |
+          cd $GITHUB_WORKSPACE/matrixone
+          echo "mode:set" >> ut_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 1" >> ut_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 0" >> ut_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 1" >> ut_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 1" >> bvt_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 1" >> bvt_coverage.out
+          echo "github.com/matrixorigin/matrixone/cmd/mo-service/config.go:161.26,175.2 1 1" >> bvt_coverage.out
 
+      - name: Check Coverage(compare with branch main)
+        uses: Rosyrain/CI_test/actions/check-coverage@main
+        with:
+          type: open
+          ut_coverage_file: ${{ github.workspace }}/matrixone/ut_coverage.out
+          bvt_coverage_file: ${{ github.workspace }}/matrixone/bvt_coverage.out
+          #commit_id: ${{ github.event.pull_request.head.sha }}
+          commit_id: '000001'
+          branch: 'main'
+          mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
+          mo_port: 6001
+          mo_user: 01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin
+          mo_password: Jx20031002
+          mo_database: mo_coverage
       - name: Set up Go and JAVA
         uses: matrixorigin/CI/actions/setup-env@main
         with:
@@ -198,17 +222,3 @@ jobs:
           name: all-middle-files
           path: ${{ github.workspace }}/all_middle_files
           retention-days: 7
-      - name: Check Coverage(compare with branch main)
-        uses: Rosyrain/CI_test/actions/check-coverage@main
-        with:
-          type: open
-          ut_coverage_file: ${{ github.workspace }}/matrixone/ut_coverage.out
-          bvt_coverage_file: ${{ github.workspace }}/matrixone/bvt_coverage.out
-          pr_number: 1
-          pr_name: PR-test
-          pr_link: https://github.com/matrixorigin/matrixone/pull/1
-          mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
-          mo_port: 6001
-          mo_user: 01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin
-          mo_password: Jx20031002
-          mo_database: mo_coverage
