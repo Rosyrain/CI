@@ -180,7 +180,8 @@ jobs:
           go tool cover -o pr_coverage.html -html=pr_coverage.out
 
       - name: Get All Middle Files
-        if: ${{ always() && !cancelled() }}
+        #if: ${{ always() && !cancelled() }}
+        if: ${{ false }}
         run: |
           cd $GITHUB_WORKSPACE
           mkdir -p all_middle_files
