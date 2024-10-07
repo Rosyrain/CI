@@ -180,8 +180,8 @@ jobs:
           go tool cover -o pr_coverage.html -html=pr_coverage.out
 
       - name: Get All Middle Files
-        #if: ${{ always() && !cancelled() }}
-        if: ${{ false }}
+        if: ${{ always() && !cancelled() }}
+#        if: ${{ false }}
         run: |
           cd $GITHUB_WORKSPACE
           mkdir -p all_middle_files
@@ -215,8 +215,8 @@ jobs:
         uses: Rosyrain/CI_test/actions/check-coverage@main
         with:
           type: open
-          ut_coverage_file: ${{ github.workspace }}/matrixone/ut_coverage.out
-          bvt_coverage_file: ${{ github.workspace }}/matrixone/bvt_coverage.out
+          ut_coverage_file: ${{ github.workspace }}/all_middle_files/ut_coverage_sort.out
+          bvt_coverage_file: ${{ github.workspace }}/all_middle_files/bvt_coverage.out
           #commit_id: ${{ github.event.pull_request.head.sha }}
           commit_id: '000001'
           branch: 'main'
