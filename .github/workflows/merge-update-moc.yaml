@@ -1,0 +1,36 @@
+name: Merge and Update MOC
+on:
+  workflow_call:
+    EE_DB_ADDR:
+      description: "matrixone cloud host"
+      required: true
+    EE_DB_PORT:
+      description: "matrixone cloud port"
+      required: true
+    EE_DB_USER:
+      description: "matrixone cloud user"
+      required: true
+    EE_DB_PASSWORD:
+      description: "matrixone cloud password"
+      required: true
+    EE_DB_DB:
+      description: "matrixone cloud db"
+      required: true
+
+jobs:
+  Update_MOC:
+    name: Update MOC
+    if: ${{ github.event.pull_request.merged == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update MOC Data
+        uses: Rosyrain/CI/actions/check-coverage@PR-coverage-moc-test
+        with:
+          type: merged
+          commit_id: ${{ github.event.pull_request.head.sha }}
+          branch: 'main'
+          mo_host: ${{ secrets.EE_DB_ADDR }}
+          mo_port: ${{ secrets.EE_DB_PORT }}
+          mo_user: ${{ secrets.EE_DB_USER }}
+          mo_password: ${{ secrets.EE_DB_PASSWORD }}
+          mo_database: ${{ secrets.EE_DB_DB }}

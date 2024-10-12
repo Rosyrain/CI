@@ -1,0 +1,36 @@
+name: Coverage Comparison Action
+description: 'Compares coverage and updates database.'
+inputs:
+  type:
+    description: 'PR status is open or merged'
+    required: true
+  ut_coverage_file:
+    description: 'Ut coverage file path'
+    required: false
+  bvt_coverage_file:
+    description: 'Bvt coverage file path'
+    required: false
+  commit_id:
+    description: 'github commit id'
+    required: true
+  branch:
+    description: 'This branch'
+    required: true
+  mo_host:
+    description: 'This mo host'
+    required: true
+  mo_port:
+    description: 'This mo port'
+    required: true
+  mo_user:
+    description: 'This mo user'
+    required: true
+  mo_password:
+    description: 'This mo password'
+    required: true
+  mo_database:
+    description: 'This mo datavase Name'
+    required: true
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
