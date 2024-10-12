@@ -64846,10 +64846,10 @@ async function exists(conn, commitId) {
     });
 }
 
-async function getLatest(conn) {
-    const sql = "SELECT * FROM `coverage` WHERE `status` = 0 ORDER BY `update_time` DESC LIMIT 1";
+async function getLatest(conn,branch) {
+    const sql = "SELECT * FROM `coverage` WHERE `status` = 0 AND `branch` = ? ORDER BY `update_time` DESC LIMIT 1";
     return new Promise((resolve, reject) => {
-        conn.query(sql, (err, results) => {
+        conn.query(sql, [branch],(err, results) => {
             if (err) {
                 logger.error(`Get latest merged PR info failed, err: ${err}`);
                 return reject(err);
@@ -64926,7 +64926,7 @@ async function main() {
         const currentBvtCoverage = parseCoverage(bvtCoverageFile);
         logger.info(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
 
-        const latestPrData = await getLatest(conn);
+        const latestPrData = await getLatest(conn,branch);
         if (!latestPrData || latestPrData.length === 0) {
             logger.error(`No latest merged PR data found in the database.`);
             core.setFailed(`No latest merged PR data found.`);
