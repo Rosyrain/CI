@@ -218,7 +218,7 @@ jobs:
           ut_coverage_file: ${{ github.workspace }}/all_middle_files/ut_coverage_sort.out
           bvt_coverage_file: ${{ github.workspace }}/all_middle_files/bvt_coverage.out
           #commit_id: ${{ github.event.pull_request.head.sha }}
-          commit_id: '000001'
+          commit_id: 'test'
           branch: 'main'
           mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
           mo_port: 6001
