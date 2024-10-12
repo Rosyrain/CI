@@ -144,74 +144,76 @@ function parseCoverage(file) {
 }
 
 async function main() {
+    let conn;
+    try {
+        const type = core.getInput('type');
+        const utCoverageFile = core.getInput('ut_coverage_file');
+        const bvtCoverageFile = core.getInput('bvt_coverage_file');
+        const commitId = core.getInput('commit_id');
+        const branch = core.getInput('branch');
+        const moHost = core.getInput('mo_host');
+        const moPort = parseInt(core.getInput('mo_port'));
+        const moUser = core.getInput('mo_user');
+        const moPassword = core.getInput('mo_password');
+        const moDatabase = core.getInput('mo_database');
 
-    // const type = 'open';
-    // const utCoverageFile = './ut_coverage.out';
-    // const bvtCoverageFile = './bvt_coverage.out';
-    // const commitId = '1fea25c';
-    // const branch = 'main';
-    // const moHost = 'freetier-01.cn-hangzhou.cluster.matrixonecloud.cn';
-    // const moPort = 6001;
-    // const moUser = '01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin';
-    // const moPassword = 'Jx20031002';
-    // const moDatabase = 'mo_coverage';
+        conn = await initMysqlConnection(moHost, moPort, moUser, moPassword, moDatabase);
+        logger.info('Initialized MOC connection successfully.');
 
-    const type = core.getInput('type');
-    const utCoverageFile = core.getInput('ut_coverage_file');
-    const bvtCoverageFile = core.getInput('bvt_coverage_file');
-    const commitId = core.getInput('commit_id');
-    const branch = core.getInput('branch');
-    const moHost = core.getInput('mo_host');
-    const moPort = parseInt(core.getInput('mo_port'));
-    const moUser = core.getInput('mo_user');
-    const moPassword = core.getInput('mo_password');
-    const moDatabase = core.getInput('mo_database');
-
-    const conn = await initMysqlConnection(moHost, moPort, moUser, moPassword, moDatabase);
-    logger.info('Initialized MO connection successfully.');
-
-    if (type === 'merged') {
-        if (await exists(conn, commitId)) {
-            await updateStatus(conn, commitId, '0');
-            logger.info(`${commitId} has been merged.Just update status-0 in database.`);
-            conn.end();
-            process.exit(0);
-        } else {
-            logger.warn(`This commit ${commitId} don't exist in database.`);
-            conn.end();
-            process.exit(1);
+        if (type === 'merged') {
+            if (await exists(conn, commitId)) {
+                await updateStatus(conn, commitId, '0');
+                logger.info(`${commitId} has been merged. Just update status to 0 in database.`);
+                return;
+            } else {
+                logger.warn(`This commit ${commitId} doesn't exist in the database.`);
+                core.setFailed(`Commit ${commitId} not found in the database.`);
+                return;
+            }
+        } else if (type !== 'open') {
+            logger.error(`Invalid type: ${type}`);
+            core.setFailed(`Invalid type: ${type}`);
+            return;
         }
-    }  else if (type !== 'open') {
-        logger.error(`Invalid type: ${type}`);
-        conn.end();
-        process.exit(1);
+
+        const currentUtCoverage = parseCoverage(utCoverageFile);
+        const currentBvtCoverage = parseCoverage(bvtCoverageFile);
+        logger.info(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
+
+        const latestPrData = await getLatest(conn);
+        if (!latestPrData || latestPrData.length === 0) {
+            logger.error(`No latest merged PR data found in the database.`);
+            core.setFailed(`No latest merged PR data found.`);
+            return;
+        }
+
+        const mainUtCoverage = latestPrData[0].ut_coverage;
+        const mainBvtCoverage = latestPrData[0].bvt_coverage;
+        logger.info(`Latest PR info: ${JSON.stringify(latestPrData[0])}`);
+
+        if (currentUtCoverage < mainUtCoverage || currentBvtCoverage < mainBvtCoverage) {
+            logger.warn(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
+            logger.warn(`Main branch UT coverage: ${mainUtCoverage}%, Main branch BVT coverage: ${mainBvtCoverage}%`);
+            logger.error(`The coverage is lower than the main branch coverage, please check it.`);
+            core.setFailed(`Coverage below main branch: UT ${currentUtCoverage}% < ${mainUtCoverage}%, BVT ${currentBvtCoverage}% < ${mainBvtCoverage}%`);
+            return;
+        }
+        logger.info("Current coverage is above or equal to main branch coverage, will insert or update this PR info.");
+        await updateData(conn, commitId, branch, currentUtCoverage, currentBvtCoverage);
+    } catch (error) {
+        logger.error(`Error in main function: ${error}`);
+        core.setFailed(`Error in main function: ${error.message}`);
+    } finally {
+        if (conn && conn.end) {
+            conn.end(err => {
+                if (err) {
+                    logger.error(`Error closing MySQL connection: ${err}`);
+                } else {
+                    logger.info('MOC connection closed.');
+                }
+            });
+        }
     }
-
-    const currentUtCoverage = parseCoverage(utCoverageFile);
-    const currentBvtCoverage = parseCoverage(bvtCoverageFile);
-    logger.info(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
-
-    const latestPrData = await getLatest(conn);
-    if (!latestPrData || latestPrData.length === 0) {
-        logger.error(`No latest merged PR data found in database.`);
-        conn.end();
-        process.exit(1);
-    }
-
-    const mainUtCoverage = latestPrData[0].ut_coverage;
-    const mainBvtCoverage = latestPrData[0].bvt_coverage;
-    logger.info(`Latest PR info: ${JSON.stringify(latestPrData[0])}`);
-
-    if (currentUtCoverage < mainUtCoverage || currentBvtCoverage < mainBvtCoverage) {
-        logger.warn(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
-        logger.warn(`Main branch UT coverage: ${mainUtCoverage}%, Main branch BVT coverage: ${mainBvtCoverage}%`);
-        logger.error(`The coverage is lower than the main branch coverage, please check it.`);
-        conn.end();
-        process.exit(1);
-    }
-    logger.info("current coverage above or equal main branch coverage,will insert or update this PR info.")
-    await updateData(conn, commitId,branch, currentUtCoverage, currentBvtCoverage);
-    conn.end();
 }
 
-main().catch(error => logger.error(`Error in main function: ${error}`));
+main();
