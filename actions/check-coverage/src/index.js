@@ -114,7 +114,7 @@ async function getLatest(conn,branch) {
     });
 }
 
-async function updateData(connection, commitId,pr_number,branch, utCoverage, bvtCoverage) {
+async function updateData(connection, commitId,branch,pr_number, utCoverage, bvtCoverage) {
     if (await exists(connection, commitId)) {
         await update(connection, commitId, utCoverage, bvtCoverage);
         logger.info(`This PR already exists, just update coverage. commitId: ${commitId}`);
