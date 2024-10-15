@@ -31,9 +31,9 @@ async function initMysqlConnection(host, port, user, password, database) {
     });
 }
 
-function insert(conn, commitId,branch, utCoverage, bvtCoverage, status) {
-    const sql = "INSERT INTO `coverage` (`commit_id`,`branch`, `ut_coverage`, `bvt_coverage`, `status`) VALUES (?, ?, ?, ?, ?)";
-    const values = [commitId,branch, utCoverage, bvtCoverage, status];
+function insert(conn, commitId,branch,pr_number, utCoverage, bvtCoverage, status) {
+    const sql = "INSERT INTO `coverage` (`commit_id`,`branch`,`pr_number`, `ut_coverage`, `bvt_coverage`, `status`) VALUES (?, ?, ?, ?, ?, ?)";
+    const values = [commitId,branch,pr_number, utCoverage, bvtCoverage, status];
     return new Promise((resolve, reject) => {
         conn.query(sql, values, (err, results) => {
             if (err) {
@@ -114,13 +114,13 @@ async function getLatest(conn,branch) {
     });
 }
 
-async function updateData(connection, commitId,branch, utCoverage, bvtCoverage) {
+async function updateData(connection, commitId,pr_number,branch, utCoverage, bvtCoverage) {
     if (await exists(connection, commitId)) {
         await update(connection, commitId, utCoverage, bvtCoverage);
         logger.info(`This PR already exists, just update coverage. commitId: ${commitId}`);
     } else {
-        await insert(connection, commitId,branch, utCoverage, bvtCoverage, 1);
-        logger.info(`This PR is new, insert coverage. commitId: ${commitId}`);
+        await insert(connection, commitId,branch,pr_number, utCoverage, bvtCoverage, 1);
+        logger.info(`This PR is new, insert coverage. commitId: ${commitId},pr_number: ${pr_number}`);
     }
 }
 
@@ -151,6 +151,7 @@ async function main() {
         const bvtCoverageFile = core.getInput('bvt_coverage_file');
         const commitId = core.getInput('commit_id');
         const branch = core.getInput('branch');
+        const prNumber = core.getInput('pr_number');
         const moHost = core.getInput('mo_host');
         const moPort = parseInt(core.getInput('mo_port'));
         const moUser = core.getInput('mo_user');
@@ -199,7 +200,7 @@ async function main() {
             return;
         }
         logger.info("Current coverage is above or equal to main branch coverage, will insert or update this PR info.");
-        await updateData(conn, commitId, branch, currentUtCoverage, currentBvtCoverage);
+        await updateData(conn, commitId, branch, prNumber, currentUtCoverage, currentBvtCoverage);
     } catch (error) {
         logger.error(`Error in main function: ${error}`);
         core.setFailed(`Error in main function: ${error.message}`);

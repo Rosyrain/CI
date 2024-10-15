@@ -16,6 +16,9 @@ inputs:
   branch:
     description: 'This branch'
     required: true
+  pr_number:
+    description: 'This pr number'
+    required: true
   mo_host:
     description: 'This mo host'
     required: true

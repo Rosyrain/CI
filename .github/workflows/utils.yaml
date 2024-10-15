@@ -244,6 +244,7 @@ jobs:
           bvt_coverage_file: ${{ github.workspace }}/coverage_downloads/bvt_coverage.out
           commit_id: ${{ github.event.pull_request.head.sha }}
           branch: 'main'
+          pr_number: ${{ github.event.pull_request.number }}
           mo_host: ${{ secrets.EE_DB_ADDR }}
           mo_port: ${{ secrets.EE_DB_PORT }}
           mo_user: ${{ secrets.EE_DB_USER }}
