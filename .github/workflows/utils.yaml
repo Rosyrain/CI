@@ -95,6 +95,8 @@ jobs:
         timeout-minutes: 45
         run: |
           cd $GITHUB_WORKSPACE/matrixone
+          export TEST_S3FS_ALIYUN=${{ secrets.TEST_S3FS_ALIYUN }}
+          export TEST_S3FS_QCLOUD=${{ secrets.TEST_S3FS_QCLOUD }}
           test_scope=$(go list ./... | grep -v 'driver\|engine/aoe\|engine/memEngine\|pkg/catalog')
           make clean && make config && make cgo
           echo "ut start"
