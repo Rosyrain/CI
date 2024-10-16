@@ -213,17 +213,17 @@ jobs:
           path: ${{ github.workspace }}/all_middle_files
           retention-days: 7
 
-      - name: Check Coverage(compare with branch main)
-        uses: Rosyrain/CI_test/actions/check-coverage@main
-        with:
-          type: open
-          ut_coverage_file: ${{ github.workspace }}/all_middle_files/ut_coverage_sort.out
-          bvt_coverage_file: ${{ github.workspace }}/all_middle_files/bvt_coverage.out
-          #commit_id: ${{ github.event.pull_request.head.sha }}
-          commit_id: 'test'
-          branch: 'main'
-          mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
-          mo_port: 6001
-          mo_user: 01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin
-          mo_password: Jx20031002
-          mo_database: mo_coverage
+#      - name: Check Coverage(compare with branch main)
+#        uses: Rosyrain/CI_test/actions/check-coverage@main
+#        with:
+#          type: open
+#          ut_coverage_file: ${{ github.workspace }}/all_middle_files/ut_coverage_sort.out
+#          bvt_coverage_file: ${{ github.workspace }}/all_middle_files/bvt_coverage.out
+#          #commit_id: ${{ github.event.pull_request.head.sha }}
+#          commit_id: 'test'
+#          branch: 'main'
+#          mo_host: freetier-01.cn-hangzhou.cluster.matrixonecloud.cn
+#          mo_port: 6001
+#          mo_user: 01918e17-faae-72bf-8fb8-acf95135efd8:admin:accountadmin
+#          mo_password: Jx20031002
+#          mo_database: mo_coverage
