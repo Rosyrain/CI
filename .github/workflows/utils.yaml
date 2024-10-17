@@ -127,6 +127,7 @@ jobs:
       - name: Start Unit Test
         timeout-minutes: 45
         run: |
+          set -o pipefail
           cd $GITHUB_WORKSPACE/matrixone
           export TEST_S3FS_ALIYUN=${{ secrets.TEST_S3FS_ALIYUN }}
           export TEST_S3FS_QCLOUD=${{ secrets.TEST_S3FS_QCLOUD }}

@@ -158,6 +158,7 @@ jobs:
       - name: Start Unit Test
         timeout-minutes: 120
         run: |
+          set -o pipefail
           cd $GITHUB_WORKSPACE/matrixone
           test_scope=$(go list ./... | grep -v 'driver\|engine/aoe\|engine/memEngine\|pkg/catalog')
           make clean && make config && make cgo
