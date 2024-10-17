@@ -70,7 +70,7 @@ jobs:
     if: ${{ needs.check_organization_user.outputs.safe_label == '1' || needs.check_organization_user.outputs.in_org == '1' }}
     name: PR Unit and BVT Test Coverage
     needs: [check_organization_user]
-    runs-on: amd64-mo-guangzhou-2xlarge16
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
