@@ -205,7 +205,8 @@ jobs:
       - name: Checkout for Python file
         uses: actions/checkout@v3
         with:
-          repository: matrixorigin/CI
+          repository: Rosyrain/CI
+          ref: optimize-python
           fetch-depth: "1"
           path: CI
       - name: Get Python file
