@@ -177,7 +177,8 @@ jobs:
           rm -rf ./mo-tester/lib
           mv ${{ github.workspace }}/workspace ${{ github.workspace }}/upload/
           mv ${{ github.workspace }}/mo-tester ${{ github.workspace }}/upload/
-
+      - name: tree
+        run: tree -d
       - uses: actions/upload-artifact@v4
         if: ${{ failure() || cancelled()}}
         continue-on-error: true
