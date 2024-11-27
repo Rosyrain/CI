@@ -257,7 +257,7 @@ jobs:
           echo "FAIL_UT_CASES=${fail_ut_cases}" >> $GITHUB_OUTPUT
       - name: Insert Failed UT Cases to MOC
         if: ${{ failure() }}
-        uses: matrixorigin/CI/actions/fail-ut-case@new-utcase-test
+        uses: rosyrain/CI/actions/fail-ut-case@new-utcase-test
         with:
           action_time: ${{ steps.time.outputs.ACTION_TIME }}
           ut_cases: ${{ steps.failed.outputs.FAIL_UT_CASES }}
