@@ -25,6 +25,21 @@ on:
       TENCENT_SK:
         description: "TENCENT_SK For UT Test"
         required: true
+      EE_DB_ADDR:
+        description: "matrixone cloud host"
+        required: true
+      EE_DB_PORT:
+        description: "matrixone cloud port"
+        required: true
+      EE_DB_USER:
+        description: "matrixone cloud user"
+        required: true
+      EE_DB_PASSWORD:
+        description: "matrixone cloud password"
+        required: true
+      EE_DB_DB:
+        description: "matrixone cloud db"
+        required: true
 
 jobs:
   check_organization_user:
