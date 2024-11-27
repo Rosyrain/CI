@@ -31,9 +31,9 @@ async function initMysqlConnection(host, port, user, password, database) {
     });
 }
 
-function insert(conn,action_time,ut_name,pr_link,job_time) {
-    const sql = "INSERT INTO `ut` (`action_time`,`ut_name`,`pr_link`,`job_time`) VALUES (?,?,?,?)";
-    const values = [action_time, ut_name, pr_link, job_time];
+function insert(conn,action_time,ut_name,pr_link,action_link,job_time) {
+    const sql = "INSERT INTO `ut` (`action_time`,`ut_name`,`pr_link`,`action_link`,`job_time`) VALUES (?,?,?,?,?)";
+    const values = [action_time, ut_name, pr_link, action_link, job_time];
     return new Promise((resolve, reject) => {
         conn.query(sql, values, (err, results) => {
             if (err) {
@@ -50,9 +50,10 @@ async function main() {
     let conn;
     try {
         const action_time = core.getInput('action_time');
-        const ut_cases = core.getInput('ut_cases');
-        const pr_link = core.getInput('pr_link');
         const job_time = core.getInput('job_time');
+        const pr_link = core.getInput('pr_link');
+        const action_link = core.getInput('action_link');
+        const ut_cases = core.getInput('ut_cases');
         const moHost = core.getInput('mo_host');
         const moPort = parseInt(core.getInput('mo_port'));
         const moUser = core.getInput('mo_user');
@@ -68,7 +69,7 @@ async function main() {
                 continue
             }
             const case_name=case_list[i]
-            await insert(conn,action_time,case_name,pr_link,job_time)
+            await insert(conn,action_time,case_name,pr_link,action_link,job_time)
         }
     } catch (error) {
         logger.error(`Error in main function: ${error}`);

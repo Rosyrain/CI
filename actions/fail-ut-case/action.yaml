@@ -11,6 +11,9 @@ inputs:
   pr_link:
     description: 'This pr link'
     required: true
+  action_link:
+    description: 'This action link'
+    required: true
   job_time:
     description: 'This job time'
     required: true
