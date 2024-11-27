@@ -216,7 +216,7 @@ jobs:
         if: ${{ failure() }}
         run: |
           go install github.com/matrixorigin/go-ut-analysis@latest
-          go-ut-analysis test -f "$GITHUB_WORKSPACE/${{ env.ut_report }}" --first 10 --report-path  "$GITHUB_WORKSPACE/ut-report" --stdout=false;
+          go-ut-analysis test -f "$GITHUB_WORKSPACE/matrixone/${{ env.ut_report }}" --first 10 --report-path  "$GITHUB_WORKSPACE/ut-report" --stdout=false;
           if find ut-report > /dev/null 2>&1 && ! find ut-report/failed/outputs > /dev/null 2>&1; then
             logger "INF" "UNIT TESTING SUCCEEDED !!!"
           else
