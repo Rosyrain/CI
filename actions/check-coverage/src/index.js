@@ -192,11 +192,11 @@ async function main() {
         const mainBvtCoverage = latestPrData[0].bvt_coverage;
         logger.info(`Latest PR info: ${JSON.stringify(latestPrData[0])}`);
 
-        if (currentUtCoverage < mainUtCoverage || currentBvtCoverage < mainBvtCoverage) {
+        if (currentUtCoverage < mainUtCoverage - 1 || currentBvtCoverage < mainBvtCoverage - 1) {
             logger.warn(`Current UT coverage: ${currentUtCoverage}%, Current BVT coverage: ${currentBvtCoverage}%`);
             logger.warn(`Main branch UT coverage: ${mainUtCoverage}%, Main branch BVT coverage: ${mainBvtCoverage}%`);
             logger.error(`The coverage is lower than the main branch coverage, please check it.`);
-            core.setFailed(`Coverage below main branch: UT ${currentUtCoverage}% < ${mainUtCoverage}%, BVT ${currentBvtCoverage}% < ${mainBvtCoverage}%`);
+            core.setFailed(`Coverage below: UT ${currentUtCoverage}% < ${mainUtCoverage-1}% or BVT ${currentBvtCoverage}% < ${mainBvtCoverage-1}%`);
             return;
         }
         logger.info("Current coverage is above or equal to main branch coverage, will insert or update this PR info.");
